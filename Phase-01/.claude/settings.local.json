@@ -4,7 +4,8 @@
       "Bash(.specify/scripts/bash/create-new-feature.sh \"/sp.specify In-Memory Python Console Todo App \\(Phase I\\)\n\nTarget audience:\n- Reviewers of agentic AI development workflows\n\nObjective:\nBuild a console-based todo app that stores all data in memory, developed strictly via Spec-Kit Plus → Claude Code \\(no manual coding\\).\n\nFocus:\n- Core todo functionality\n- Clean structure\n- Deterministic CLI behavior\n\nSuccess criteria:\n- Supports: Add, Delete, Update, View, Mark Complete\n- In-memory only \\(no files, no DB\\)\n- Runs correctly via CLI\n- Clean, readable Python structure\n\nConstraints:\n- Python 3.13+\n- UV environment\n- Standard library only\n- Console app only\n- No manual code edits\n\nNot building:\n- Persistence\n- Web/UI\n- AI features\n- Tests or frameworks\" --number 1 --short-name \"console-todo-app\" \"In-Memory Python Console Todo App \\(Phase I\\)\n\nTarget audience:\n- Reviewers of agentic AI development workflows\n\nObjective:\nBuild a console-based todo app that stores all data in memory, developed strictly via Spec-Kit Plus → Claude Code \\(no manual coding\\).\n\nFocus:\n- Core todo functionality\n- Clean structure\n- Deterministic CLI behavior\n\nSuccess criteria:\n- Supports: Add, Delete, Update, View, Mark Complete\n- In-memory only \\(no files, no DB\\)\n- Runs correctly via CLI\n- Clean, readable Python structure\n\nConstraints:\n- Python 3.13+\n- UV environment\n- Standard library only\n- Console app only\n- No manual code edits\n\nNot building:\n- Persistence\n- Web/UI\n- AI features\n- Tests or frameworks\")",
       "Bash(git rev-parse --git-dir)",
       "Bash(python -c \"from src.main import main; print\\(''Import successful''\\)\")",
-      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)"
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(python src/main.py)"
     ]
   }
 }
