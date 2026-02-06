@@ -21,9 +21,6 @@ ENV/
 *.swo
 *~
 
-# Claude Code (local configuration)
-.claude/
-
 # Logs
 *.log
 logs/
