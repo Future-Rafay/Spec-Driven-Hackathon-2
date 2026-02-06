@@ -1,0 +1,388 @@
+openapi: 3.1.0
+info:
+  title: Authentication & Identity API
+  description: |
+    RESTful API for user authentication and identity management in the Todo Full-Stack Web Application.
+
+    **Security Model**:
+    - JWT-based authentication (stateless)
+    - Bearer token in Authorization header
+    - 7-day token expiry
+    - HTTP 401 for authentication failures
+    - HTTP 403 for authorization failures
+
+    **Base URL**: `http://localhost:8000` (development)
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User registration and sign-in operations
+
+paths:
+  /api/auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: |
+        Create a new user account with email and password.
+
+        **Requirements**:
+        - Email must be valid format and unique
+        - Password must meet security requirements (8+ chars, uppercase, lowercase, digit, special char)
+
+        **Success**: Returns 201 with user information (no JWT issued, user must sign in)
+
+        **Errors**:
+        - 400: Invalid email format or weak password
+        - 409: Email already registered
+        - 422: Validation error
+      operationId: signupUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+            examples:
+              valid:
+                summary: Valid registration
+                value:
+                  email: user@example.com
+                  password: SecurePass123!
+              weak_password:
+                summary: Weak password (will fail)
+                value:
+                  email: user@example.com
+                  password: weak
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: 550e8400-e29b-41d4-a716-446655440000
+                email: user@example.com
+                created_at: '2026-02-04T10:30:00Z'
+                last_signin_at: null
+        '400':
+          description: Bad request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_email:
+                  summary: Invalid email format
+                  value:
+                    detail: Invalid email format
+                    error_code: INVALID_EMAIL
+                weak_password:
+                  summary: Password too weak
+                  value:
+                    detail: Password must contain at least one uppercase letter
+                    error_code: WEAK_PASSWORD
+        '409':
+          description: Conflict - Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: Email already registered
+                error_code: EMAIL_EXISTS
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: Sign in user
+      description: |
+        Authenticate user with email and password, returns JWT token.
+
+        **Success**: Returns 200 with JWT token and user information
+
+        **Security**:
+        - Generic error message for incorrect credentials (doesn't reveal if email exists)
+        - Timing-attack resistant password verification
+        - Updates last_signin_at timestamp
+
+        **Errors**:
+        - 401: Invalid credentials (email not found or password incorrect)
+        - 422: Validation error
+      operationId: signinUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignIn'
+            example:
+              email: user@example.com
+              password: SecurePass123!
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+              example:
+                access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTcwNzU2MTYwMH0.signature
+                token_type: bearer
+                expires_in: 604800
+                user:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  email: user@example.com
+                  created_at: '2026-02-04T10:30:00Z'
+                  last_signin_at: '2026-02-04T15:45:00Z'
+        '401':
+          description: Unauthorized - Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: Invalid email or password
+                error_code: INVALID_CREDENTIALS
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: |
+        Retrieve information about the currently authenticated user.
+
+        **Authentication**: Requires valid JWT token in Authorization header
+
+        **Use Case**: Verify authentication status, get user details
+
+        **Errors**:
+        - 401: Missing or invalid JWT token
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: 550e8400-e29b-41d4-a716-446655440000
+                email: user@example.com
+                created_at: '2026-02-04T10:30:00Z'
+                last_signin_at: '2026-02-04T15:45:00Z'
+        '401':
+          description: Unauthorized - Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_token:
+                  summary: No token provided
+                  value:
+                    detail: Not authenticated
+                    error_code: MISSING_TOKEN
+                invalid_token:
+                  summary: Invalid or expired token
+                  value:
+                    detail: Invalid authentication credentials
+                    error_code: INVALID_TOKEN
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token obtained from /api/auth/signin endpoint.
+
+        **Format**: `Authorization: Bearer <token>`
+
+        **Token Payload**:
+        ```json
+        {
+          "id": "user-uuid",
+          "email": "user@example.com",
+          "exp": 1707561600,
+          "iat": 1706956800
+        }
+        ```
+
+  schemas:
+    UserCreate:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: User email address (must be unique)
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          format: password
+          description: |
+            User password. Must meet security requirements:
+            - Minimum 8 characters
+            - At least one uppercase letter
+            - At least one lowercase letter
+            - At least one digit
+            - At least one special character
+          example: SecurePass123!
+
+    UserSignIn:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          description: User password
+          example: SecurePass123!
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp (ISO 8601)
+          example: '2026-02-04T10:30:00Z'
+        last_signin_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last successful sign-in timestamp (ISO 8601)
+          example: '2026-02-04T15:45:00Z'
+
+    AuthToken:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+        - user
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTcwNzU2MTYwMH0.signature
+        token_type:
+          type: string
+          enum: [bearer]
+          description: Token type (always "bearer")
+          example: bearer
+        expires_in:
+          type: integer
+          description: Token expiry duration in seconds (7 days = 604800)
+          example: 604800
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message
+          example: Invalid email or password
+        error_code:
+          type: string
+          description: Machine-readable error code
+          example: INVALID_CREDENTIALS
+          enum:
+            - INVALID_EMAIL
+            - WEAK_PASSWORD
+            - EMAIL_EXISTS
+            - INVALID_CREDENTIALS
+            - MISSING_TOKEN
+            - INVALID_TOKEN
+            - FORBIDDEN
+
+    ValidationError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  type: string
+                description: Location of the error (field path)
+              msg:
+                type: string
+                description: Error message
+              type:
+                type: string
+                description: Error type
+          example:
+            - loc: [body, email]
+              msg: field required
+              type: value_error.missing
+            - loc: [body, password]
+              msg: ensure this value has at least 8 characters
+              type: value_error.any_str.min_length
+
+security: []
