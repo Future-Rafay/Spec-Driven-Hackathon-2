@@ -22,7 +22,7 @@ class BackendAPIClient {
   private tokenCache: { token: string; expiresAt: number } | null = null
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+    this.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
   }
 
   /**

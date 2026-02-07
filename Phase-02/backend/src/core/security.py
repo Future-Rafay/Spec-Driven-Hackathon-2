@@ -4,7 +4,7 @@ Implements secure password hashing and JWT token operations.
 """
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
-from passlib.context import CryptContext
+import bcrypt
 import jwt
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from fastapi import Depends, HTTPException, status
@@ -16,14 +16,6 @@ from .config import settings
 from .database import get_session
 
 logger = logging.getLogger(__name__)
-
-# Password hashing context with bcrypt
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__rounds=12,  # 12 rounds for security (2026 standard)
-    bcrypt__ident="2b"  # Use bcrypt variant 2b (most secure)
-)
 
 # HTTP Bearer security scheme
 security = HTTPBearer()
@@ -39,7 +31,9 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string
     """
-    return pwd_context.hash(password)
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -54,7 +48,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches, False otherwise
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
 def create_access_token(data: Dict[str, Any]) -> str:

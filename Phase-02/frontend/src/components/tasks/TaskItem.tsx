@@ -131,8 +131,8 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-3">
+    <div className="card-hover p-5 animate-scale-in">
+      <div className="flex items-start gap-4">
         {/* Completion checkbox */}
         <div className="flex-shrink-0 mt-1">
           <input
@@ -140,7 +140,8 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
             checked={task.completed}
             onChange={handleToggleClick}
             disabled={isToggling}
-            className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="checkbox"
+            aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
           />
         </div>
 
@@ -148,7 +149,7 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
         <div className="flex-1 min-w-0">
           {isEditing ? (
             /* Edit mode */
-            <div className="space-y-3">
+            <div className="space-y-3 animate-fade-in">
               <div>
                 <input
                   type="text"
@@ -157,15 +158,19 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
                     setEditTitle(e.target.value)
                     setTitleError(null)
                   }}
-                  className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    titleError ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`input text-sm ${titleError ? 'input-error' : ''}`}
                   placeholder="Task title"
                   maxLength={500}
                   disabled={isSaving}
+                  autoFocus
                 />
                 {titleError && (
-                  <p className="mt-1 text-xs text-red-600">{titleError}</p>
+                  <p className="mt-1 text-xs text-danger-600 flex items-center">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {titleError}
+                  </p>
                 )}
               </div>
               <div>
@@ -176,29 +181,44 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
                     setDescriptionError(null)
                   }}
                   rows={3}
-                  className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    descriptionError ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`input text-sm resize-none ${descriptionError ? 'input-error' : ''}`}
                   placeholder="Task description (optional)"
                   maxLength={2000}
                   disabled={isSaving}
                 />
                 {descriptionError && (
-                  <p className="mt-1 text-xs text-red-600">{descriptionError}</p>
+                  <p className="mt-1 text-xs text-danger-600 flex items-center">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {descriptionError}
+                  </p>
                 )}
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleSaveEdit}
                   disabled={isSaving}
-                  className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="btn btn-success px-4 py-2 text-sm"
                 >
-                  {isSaving ? 'Saving...' : 'Save'}
+                  {isSaving ? (
+                    <span className="flex items-center">
+                      <svg className="spinner w-4 h-4 mr-1" viewBox="0 0 24 24"></svg>
+                      Saving...
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={handleCancelEdit}
                   disabled={isSaving}
-                  className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn btn-outline px-4 py-2 text-sm"
                 >
                   Cancel
                 </button>
@@ -208,25 +228,47 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
             /* Display mode */
             <>
               <h3
-                className={`text-base font-medium ${
-                  task.completed ? 'line-through text-gray-500' : 'text-gray-900'
+                className={`text-base font-semibold transition-all duration-200 ${
+                  task.completed ? 'line-through text-gray-400' : 'text-gray-900'
                 }`}
               >
                 {task.title}
               </h3>
               {task.description && (
                 <p
-                  className={`mt-1 text-sm ${
+                  className={`mt-2 text-sm transition-all duration-200 ${
                     task.completed ? 'line-through text-gray-400' : 'text-gray-600'
                   }`}
                 >
                   {task.description}
                 </p>
               )}
-              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
-                <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {new Date(task.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
                 {task.updated_at !== task.created_at && (
-                  <span>Updated: {new Date(task.updated_at).toLocaleDateString()}</span>
+                  <span className="flex items-center badge badge-primary">
+                    <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Updated
+                  </span>
+                )}
+                {task.completed && (
+                  <span className="badge badge-success">
+                    <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Completed
+                  </span>
                 )}
               </div>
             </>
@@ -238,10 +280,11 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
           <div className="flex-shrink-0 flex gap-2">
             <button
               onClick={handleEditClick}
-              className="text-gray-400 hover:text-blue-600 transition-colors"
+              className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 focus-visible-ring"
               title="Edit task"
+              aria-label="Edit task"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -252,10 +295,11 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
             </button>
             <button
               onClick={handleDeleteClick}
-              className="text-gray-400 hover:text-red-600 transition-colors"
+              className="p-2 text-gray-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-all duration-200 focus-visible-ring"
               title="Delete task"
+              aria-label="Delete task"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -270,33 +314,53 @@ export default function TaskItem({ task, onUpdate, onDelete, onToggle }: TaskIte
 
       {/* Delete confirmation */}
       {showDeleteConfirm && (
-        <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded p-3">
-          <p className="text-sm text-yellow-800 mb-3">
-            Are you sure you want to delete this task? This action cannot be undone.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleConfirmDelete}
-              disabled={isDeleting}
-              className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed"
-            >
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </button>
-            <button
-              onClick={handleCancelDelete}
-              disabled={isDeleting}
-              className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
+        <div className="mt-4 alert alert-warning animate-slide-down">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-yellow-800 mb-3">
+                Are you sure you want to delete this task?
+              </p>
+              <p className="text-xs text-yellow-700 mb-3">
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleConfirmDelete}
+                  disabled={isDeleting}
+                  className="btn btn-danger px-4 py-2 text-sm"
+                >
+                  {isDeleting ? (
+                    <span className="flex items-center">
+                      <svg className="spinner w-4 h-4 mr-1" viewBox="0 0 24 24"></svg>
+                      Deleting...
+                    </span>
+                  ) : (
+                    'Delete'
+                  )}
+                </button>
+                <button
+                  onClick={handleCancelDelete}
+                  disabled={isDeleting}
+                  className="btn btn-outline px-4 py-2 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Error display */}
       {error && (
-        <div className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
-          {error}
+        <div className="mt-4 alert alert-error flex items-start animate-slide-down">
+          <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          <span className="text-sm font-medium">{error}</span>
         </div>
       )}
     </div>

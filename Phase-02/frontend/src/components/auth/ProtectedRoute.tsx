@@ -33,10 +33,14 @@ export default function ProtectedRoute({
   // Show loading state while checking authentication
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center animate-fade-in">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-primary-200 rounded-full blur-xl opacity-30 animate-pulse"></div>
+            <div className="relative spinner w-16 h-16 mx-auto"></div>
+          </div>
+          <p className="text-lg text-gray-600 font-medium">Checking authentication...</p>
+          <p className="text-sm text-gray-500 mt-2">Please wait a moment</p>
         </div>
       </div>
     )

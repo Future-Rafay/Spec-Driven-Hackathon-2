@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth"
 import { jwt } from "better-auth/plugins"
 
+console.log("DB URL:", process.env.DATABASE_URL)
+
 export const auth = betterAuth({
   database: {
     provider: "postgres",

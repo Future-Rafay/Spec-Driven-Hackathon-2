@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Todo App - Authentication',
-  description: 'Secure authentication for your todo application',
+  title: 'Todo App - Modern Task Management',
+  description: 'Beautiful and secure task management application with modern UI',
 }
 
 export default function RootLayout({
@@ -12,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="min-h-screen">{children}</body>
     </html>
   )
 }

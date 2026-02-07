@@ -437,8 +437,8 @@ curl -X GET http://localhost:8080/api/tasks/<task_id> \
 ### Backend Verification
 
 - [ ] Backend starts without errors on port 8080
-- [ ] Health check endpoint responds: `curl http://localhost:808/health`
-- [ ] OpenAPI docs accessible: http://localhost:808/docs
+- [ ] Health check endpoint responds: `curl http://localhost:8080/health`
+- [ ] OpenAPI docs accessible: http://localhost:8080/docs
 - [ ] Database connection successful (check logs)
 - [ ] User registration creates user in database
 - [ ] User sign-in returns valid JWT token

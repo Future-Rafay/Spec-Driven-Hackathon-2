@@ -147,22 +147,90 @@ export default function TasksPage() {
     }
   }
 
+  const completedCount = tasks.filter(t => t.completed).length
+  const totalCount = tasks.length
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen pb-12 relative overflow-hidden">
+        {/* Background Decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow"></div>
+          <div className="absolute top-1/2 -left-40 w-96 h-96 bg-secondary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow animation-delay-200"></div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">My Tasks</h1>
-            <p className="mt-2 text-gray-600">Manage your todo list</p>
+          <div className="mb-8 animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center">
+                  <span className="gradient-text">My Tasks</span>
+                </h1>
+                <p className="text-lg text-gray-600">Organize and track your daily tasks</p>
+              </div>
+              <a
+                href="/"
+                className="btn btn-outline px-4 py-2 text-sm"
+                title="Back to home"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Home
+              </a>
+            </div>
+
+            {/* Stats */}
+            {!isLoading && !error && totalCount > 0 && (
+              <div className="flex gap-4 animate-slide-up">
+                <div className="card px-4 py-3 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
+                    <p className="text-xs text-gray-600">Total Tasks</p>
+                  </div>
+                </div>
+
+                <div className="card px-4 py-3 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-success-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-success-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
+                    <p className="text-xs text-gray-600">Completed</p>
+                  </div>
+                </div>
+
+                {totalCount > 0 && (
+                  <div className="card px-4 py-3 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">{Math.round((completedCount / totalCount) * 100)}%</p>
+                      <p className="text-xs text-gray-600">Progress</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Page-level error */}
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="mb-6 alert alert-error animate-slide-down">
               <div className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-red-400 mt-0.5"
+                  className="w-6 h-6 flex-shrink-0 mr-3"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -174,12 +242,12 @@ export default function TasksPage() {
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error loading tasks</h3>
-                  <p className="mt-1 text-sm text-red-700">{error}</p>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold mb-1">Error loading tasks</h3>
+                  <p className="text-sm">{error}</p>
                   <button
                     onClick={loadTasks}
-                    className="mt-2 text-sm font-medium text-red-600 hover:text-red-500"
+                    className="mt-3 btn btn-danger px-4 py-2 text-sm"
                   >
                     Try again
                   </button>
@@ -190,9 +258,11 @@ export default function TasksPage() {
 
           {/* Loading state */}
           {isLoading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Loading tasks...</span>
+            <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+              <div className="relative mb-4">
+                <div className="spinner w-16 h-16"></div>
+              </div>
+              <p className="text-gray-600 font-medium">Loading your tasks...</p>
             </div>
           )}
 
@@ -203,20 +273,13 @@ export default function TasksPage() {
 
           {/* Task list */}
           {!isLoading && !error && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="card p-6">
               <TaskList
                 tasks={tasks}
                 onUpdate={handleUpdate}
                 onDelete={handleDelete}
                 onToggle={handleToggle}
               />
-            </div>
-          )}
-
-          {/* Task count */}
-          {!isLoading && !error && tasks.length > 0 && (
-            <div className="mt-4 text-center text-sm text-gray-500">
-              {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} total
             </div>
           )}
         </div>
