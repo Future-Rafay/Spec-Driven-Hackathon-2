@@ -168,6 +168,34 @@ class BackendAPIClient {
 
     return response.json()
   }
+
+  /**
+   * Make authenticated PATCH request.
+   */
+  async patch<T>(endpoint: string, data?: any): Promise<T> {
+    const headers = await this.getAuthHeaders()
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: 'PATCH',
+      headers,
+      body: data ? JSON.stringify(data) : undefined
+    })
+
+    if (response.status === 401) {
+      this.tokenCache = null
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token')
+        window.location.href = '/signin'
+      }
+      throw new Error('Authentication required')
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Request failed' }))
+      throw new Error(error.detail || `API error: ${response.status}`)
+    }
+
+    return response.json()
+  }
 }
 
 export const backendAPI = new BackendAPIClient()
